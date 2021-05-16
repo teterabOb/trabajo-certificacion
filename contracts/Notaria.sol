@@ -23,23 +23,9 @@ contract Notaria{
         owner = msg.sender;
     }
 
-    /*
-    function GetDocumentosCliente(address _address, uint _id) public view returns(Documento[] memory){
-        Documento[] memory docs = new Documento[](_id);
-
-
-        require(totalDocumentosCliente[_address] > 0);
-
-        for(uint i = 0; i < totalDocumentosCliente[_address]; i++){
-            docs[i] = documentosCliente[_address][i];
-        }
-
-        return docs;
-    }
-    */
-
     function AddDocumento(uint _precio, string memory _nombre, bool _estado) public payable{
-        require(bytes(_nombre).length > 0);
+        require(msg.sender == owner, "Funcionalidad solo permitida para el owner");
+        require(bytes(_nombre).length > 0, "El nombre debe tener un largo minimo");
         documentos[documentsCount] = Documento(documentsCount, _precio,_nombre,_estado);
         documentsCount++;
         
@@ -64,5 +50,12 @@ contract Notaria{
         AddDocumentoCliente(_documento.id, _documento.precio, _documento.nombre, _documento.estado);
         // Dispara el evento
         emit DocumentoComprado(_id, msg.sender);
-    }    
+    }  
+
+    receive() external payable {}
+    
+    modifier isOwner(){
+        require(msg.sender == owner);
+        _;
+    }  
 }
