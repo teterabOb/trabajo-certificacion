@@ -17,6 +17,7 @@ class App extends Component {
       documentosPorCliente: [],
       montoAutorizado: 0,
       loading: true,
+      owner: "0x0000000000000000000000000000000000000000"
 
     }
 
@@ -63,10 +64,15 @@ class App extends Component {
       //Las funciones call leen data
       const regionesCount = await presupuesto.methods.RegionCount().call()
       const documentosCount = await notaria.methods.documentsCount().call()
+      const owner = await notaria.methods.GetOwner().call()
 
       console.log(this.state.account)
+      console.log(owner)
+      
 
-      this.setState({ regionesCount, documentosCount })
+      this.setState({ regionesCount, documentosCount, owner: owner })
+
+      console.log(this.state.owner)
       
       const contDocumentosCliente = await notaria.methods.totalDocumentosCliente(this.state.account).call()
       
@@ -79,7 +85,7 @@ class App extends Component {
        })
       }
 
-      console.log(this.state.documentosPorCliente)
+      
 
       //Arreglo para listas documentos
       for(var i = 1; i <= documentosCount; i++){   
@@ -89,15 +95,10 @@ class App extends Component {
            })
       }
 
-
-
       //console.log(this.state.documentos)
       this.setState({ loading: false })
 
-      let documentoComprado = await notaria.events.DocumentoAdded
-
-
-
+      
     } else {
       window.alert('El Contrato no ha sido desplegado en la red detectada.')
     }
@@ -157,6 +158,8 @@ class App extends Component {
                   <span className="sr-only">Loading...</span></div> 
                 : <Main  
                     regiones={ this.state.regiones } 
+                    owner={ this.state.owner } 
+                    account={ this.state.account } 
                     documentos={ this.state.documentos }
                     nuevaRegion={ this.nuevaRegion }
                     nuevoDocumento={ this.nuevoDocumento } 

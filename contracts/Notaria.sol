@@ -53,7 +53,11 @@ contract Notaria{
     }  
 
     receive() external payable {}
-    
+
+    function GetOwner() public view returns (address){
+        return owner;
+    }
+
     modifier isOwner(){
         require(msg.sender == owner);
         _;
