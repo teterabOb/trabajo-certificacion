@@ -4,7 +4,7 @@ class Navbar extends Component {
     render() {
         return (
             <nav className="navbar navbar-expand-lg navbar-dark bg-dark text-white">
-                <a className="navbar-brand" >Presupuesto Gubernamental</a>
+                <a className="navbar-brand">Notaria Inteligente</a>
                 <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
                 </button>
@@ -25,7 +25,6 @@ class Navbar extends Component {
                     </span>
                 </div>
             </nav>
-
         )
     }
 }
