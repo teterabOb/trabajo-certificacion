@@ -26,15 +26,13 @@ class App extends Component {
     this.nuevaRegion = this.nuevaRegion.bind(this)
     this.nuevoDocumento = this.nuevoDocumento.bind(this)
     this.compraDocumento = this.compraDocumento.bind(this)
+    this.addDocumentoNotaria = this.addDocumentoNotaria.bind(this)
   }
-
-
 
   async componentDidMount() {
     await this.loadWeb3();
     await this.loadBlockChainData();
   }
-
 
   async loadWeb3() {
     
@@ -59,7 +57,6 @@ class App extends Component {
     }
     else if (window.web3) {
       window.web3 = new Web3(window.web3.currentProvider)
-
 
     }
     else {
@@ -161,12 +158,10 @@ class App extends Component {
       });
   }
 
-  /*
-  async AddDocumentoNotaria(id, precio, destinatario){
+  
+  async addDocumentoNotaria(id, precio, destinatario){
     await this.state.notaria.methos.AddDocumentoNotaria(id, precio, destinatario).send({ from: this.state.account })
   }
-  */
-
 
   render() {
 
