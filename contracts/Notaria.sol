@@ -28,6 +28,9 @@ contract Notaria is CLPToken() {
     mapping(uint => Documento) public documentos;
     mapping(address => mapping(uint => Documento)) public documentosCliente;
     mapping(address => uint) public totalDocumentosCliente;
+
+    mapping(address => uint) public totalDocumentosEmisor;
+    mapping(address => uint) public totalDocumentosDestinatario;
     
     mapping(uint => DocumentoNotaria) public documentosNotaria;
     mapping(address => mapping(uint => DocumentoNotaria)) public documentosNotariaEmisor;
@@ -57,6 +60,8 @@ contract Notaria is CLPToken() {
         documentosNotariaCount++;
         DocumentoNotaria memory docNotaria = DocumentoNotaria(documentosNotariaCount, doc, msg.sender, _destinatario, _precio, EstadoDocumentoNotaria.ABIERTO);
         documentosNotaria[documentosNotariaCount] = docNotaria;
+        totalDocumentosEmisor[msg.sender]++;
+        totalDocumentosDestinatario[_destinatario]++;
         documentosNotariaEmisor[msg.sender][documentosNotariaCount] = docNotaria;
         documentosNotariaDestinatario[_destinatario][documentosNotariaCount] = docNotaria;        
         return docNotaria.estado;

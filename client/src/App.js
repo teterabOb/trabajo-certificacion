@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import PresupuestoContract from "./contracts/Presupuesto.json";
+import TokenReceiver from "./contracts/TokenReceiver.json";
 import NotariaContract from "./contracts/Notaria.json";
 import Web3 from 'web3';
 import Navbar from './Navbar';
@@ -15,9 +16,12 @@ class App extends Component {
       
       documentos: [],
       documentosPorCliente: [],
+      documentosEmisor: [],
+      documentosDestinatario: [],
       montoAutorizado: 0,
       loading: true,
-      owner: "0x0000000000000000000000000000000000000000"
+      owner: "0x0000000000000000000000000000000000000000",
+      cantToken: 0
 
     }
 
@@ -27,6 +31,8 @@ class App extends Component {
     this.nuevoDocumento = this.nuevoDocumento.bind(this)
     this.compraDocumento = this.compraDocumento.bind(this)
     this.addDocumentoNotaria = this.addDocumentoNotaria.bind(this)
+    this.aceptaDocumento = this.aceptaDocumento.bind(this)
+    
   }
 
   async componentDidMount() {
@@ -41,14 +47,11 @@ class App extends Component {
       await window.ethereum.enable()
 
       await window.web3.currentProvider.on('accountsChanged', (accounts) => {
-        console.log("cambio de cuenta")
-          
-
+            
           this.setState({
               account: accounts[0]
               
-          }, () => {           
-
+          }, () => {         
               
           })
 
@@ -65,9 +68,7 @@ class App extends Component {
     
   }
 
-
   async loadBlockChainData() {
-    console.log("blockchain data")
     const web3 = window.web3
 
     console.log(web3)
@@ -80,15 +81,18 @@ class App extends Component {
     const networkDataNotaria = NotariaContract.networks[networkId]
 
 
-
     if (networkDataNotaria) {
       
       //Limpia los documentos cliente
       this.setState({ documentos: [] })
       this.setState({ documentosPorCliente: [] })
+      this.setState({ documentosEmisor: [] })
+      this.setState({ documentosDestinatario: [] })
 
       const presupuesto = new web3.eth.Contract(PresupuestoContract.abi, networkDataPresupuesto.address);
       const notaria = new web3.eth.Contract(NotariaContract.abi, networkDataNotaria.address);
+      const tokenReceiver = new web3.eth.Contract(TokenReceiver.abi, networkDataNotaria.address);
+
       this.setState({ presupuesto, notaria })
       //Las funciones call leen data
       const regionesCount = await presupuesto.methods.RegionCount().call()
@@ -101,12 +105,34 @@ class App extends Component {
       this.setState({ regionesCount, documentosCount, owner: owner })      
       
       const contDocumentosCliente = await notaria.methods.totalDocumentosCliente(this.state.account).call()      
+      const totalDocumentosEmisor = await notaria.methods.totalDocumentosEmisor(this.state.account).call()      
+      const totalDocumentosDestinatario = await notaria.methods.totalDocumentosDestinatario(this.state.account).call()      
 
+      console.log("total emisor" + " " + totalDocumentosEmisor)
+      console.log("total destinatario" + " " + totalDocumentosDestinatario)
+
+      //Documentos por cliente
       for(var i = 1; i <= contDocumentosCliente; i++){
         const docCliente = await notaria.methods.documentosCliente(this.state.account, i).call()        
-                
+                console.log(docCliente)
         this.setState({
           documentosPorCliente: [...this.state.documentosPorCliente, docCliente ]
+       })
+      }
+
+      //Documentos Emisor
+      for(var a = 1; a <= totalDocumentosEmisor; a++){
+        const doc = await notaria.methods.documentosNotariaEmisor(this.state.account, a).call()        
+        this.setState({
+          documentosEmisor: [...this.state.documentosEmisor, doc ]
+       })
+      }
+
+      //Documentos Destinatario
+      for(var b = 1; b <= totalDocumentosDestinatario; b++){
+        const doc = await notaria.methods.documentosNotariaDestinatario(this.state.account, b).call()        
+        this.setState({
+          documentosDestinatario: [...this.state.documentosDestinatario, doc ]
        })
       }
       
@@ -118,15 +144,18 @@ class App extends Component {
            })           
       }
 
-      console.log(this.state.documentosPorCliente)
+      const cantToken = await notaria.methods.balanceOf(this.state.account).call() 
+      if(cantToken > 0) { this.setState({ cantToken: cantToken}) }  
+
       this.setState({ loading: false })
+
+      console.log(this.state.documentosEmisor)
+      console.log(this.state.documentosDestinatario)
       
     } else {
       window.alert('El Contrato no ha sido desplegado en la red detectada.')
     }
   }
-
-
 
   nuevaRegion(direccion, nombre) {
 
@@ -158,9 +187,46 @@ class App extends Component {
       });
   }
 
+  async aceptaDocumento(id){
+    await this.state.notaria.methods.AceptaDocumentoNotaria(id).send({ from: this.state.account, price: 2000000000000000000 })
+    .once('receipt', (receipt) => {
+      console.log('once')
+      this.setState({ loading: false })
+      console.log(receipt)
+    })
+    .then((receipt) => {
+      console.log('then')
+      console.log(receipt)
+
+    });
+  }
+
   
   async addDocumentoNotaria(id, precio, destinatario){
-    await this.state.notaria.methos.AddDocumentoNotaria(id, precio, destinatario).send({ from: this.state.account })
+    this.setState({ loading: true })
+    console.log(id, precio, destinatario)
+
+    await this.state.notaria.methods.AddDocumentoNotaria(id, precio, destinatario).send({ from: this.state.account })
+    .once('receipt', (receipt) => {
+      console.log('receipt')
+      this.setState({ loading: false })
+      console.log(receipt)
+    })
+    .on('confirmation', (confNumber, receipt, latestBlockHash) => {
+      console.log('confirmacion')
+      console.log(confNumber)
+      console.log(receipt)
+      console.log(latestBlockHash)
+    })
+    .on('error', (error) => {
+      console.log('error')
+      console.log(error)
+    })
+    .then((receipt) => {
+      console.log(receipt)
+
+    });
+
   }
 
   render() {
@@ -180,9 +246,13 @@ class App extends Component {
                     account={ this.state.account } 
                     documentos={ this.state.documentos }
                     documentosPorCliente={ this.state.documentosPorCliente}
+                    documentosEmisor ={ this.state.documentosEmisor}
+                    documentosDestinatario ={ this.state.documentosDestinatario}
                     nuevaRegion={ this.nuevaRegion }
                     nuevoDocumento={ this.nuevoDocumento } 
-                    compraDocumento={ this.compraDocumento }/> }
+                    compraDocumento={ this.compraDocumento }
+                    aceptaDocumento= {this.aceptaDocumento}
+                    addDocumentoNotaria={ this.addDocumentoNotaria }/> }
 
             </main>
           </div>

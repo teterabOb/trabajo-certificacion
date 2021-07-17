@@ -1,15 +1,17 @@
 import React, { Component } from 'react';
 import MantenedorNotaria from './Mantenedor/MantenedorNotaria';
+import DocumentosEmisor from './Tablas/DocumentosEmisor';
+import DocumentosDestinatario from './Tablas/DocumentosDestinatario';
 
 class Main extends Component {
     constructor(props) {
         super(props)
 
         this.state = {
-            estado: 0
+            estado: 0,            
         };
 
-        this.handleChange = this.handleChange.bind(this);        
+        this.handleChange = this.handleChange.bind(this);                  
     }
 
     handleChange(event) {
@@ -125,7 +127,17 @@ class Main extends Component {
 
                     <MantenedorNotaria 
                         documentos={this.props.documentos}
-                        addDocumentoNotaria={this.props.addDocumentoNotaria} />
+                        addDocumentoNotaria={this.props.addDocumentoNotaria} 
+                        />
+
+                    <DocumentosEmisor 
+                        documentosEmisor = {this.props.documentosEmisor}
+                        />
+
+                    <DocumentosDestinatario 
+                        documentosDestinatario = {this.props.documentosDestinatario}
+                        aceptaDocumento = {this.props.aceptaDocumento}
+                        />
                 </div>
 
 
