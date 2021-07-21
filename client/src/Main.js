@@ -8,10 +8,10 @@ class Main extends Component {
         super(props)
 
         this.state = {
-            estado: 0,            
+            estado: 0,
         };
 
-        this.handleChange = this.handleChange.bind(this);                  
+        this.handleChange = this.handleChange.bind(this);
     }
 
     handleChange(event) {
@@ -47,7 +47,7 @@ class Main extends Component {
                                     placeholder="Nombre Documento"
                                     required />
                             </div>
-                            
+
                             <div className="form-group mr-sm-2">
                                 <input
                                     id="txtPrecio"
@@ -82,7 +82,7 @@ class Main extends Component {
                         <p>Owner: {owner}</p>
                     </div>
 
-                    <div className="col-lg-6 mt-2">
+                    <div className="col-lg-12 mt-2">
                         <h1>Documentos Disponibles</h1>
                         <table className="table">
                             <thead>
@@ -124,20 +124,27 @@ class Main extends Component {
                             </tbody>
                         </table>
                     </div>
-
-                    <MantenedorNotaria 
-                        documentos={this.props.documentos}
-                        addDocumentoNotaria={this.props.addDocumentoNotaria} 
+                    <div className="col-lg-12">
+                        <MantenedorNotaria
+                            documentos={this.props.documentos}
+                            addDocumentoNotaria={this.props.addDocumentoNotaria}
                         />
-
-                    <DocumentosEmisor 
-                        documentosEmisor = {this.props.documentosEmisor}
+                    </div>
+                    <div className="col-lg-12">
+                        <DocumentosEmisor
+                            documentosEmisor={this.props.documentosEmisor}
                         />
+                    </div>
 
-                    <DocumentosDestinatario 
-                        documentosDestinatario = {this.props.documentosDestinatario}
-                        aceptaDocumento = {this.props.aceptaDocumento}
+
+                    <div className="col-lg-12">
+                        <DocumentosDestinatario
+                            documentosDestinatario={this.props.documentosDestinatario}
+                            aceptaDocumento={this.props.aceptaDocumento}
+                            finalizaDocumento={this.props.finalizaDocumento}
+                            
                         />
+                    </div>
                 </div>
 
 

@@ -16,7 +16,8 @@ class MantenedorNotaria extends Component {
                                 const id = event.target.id.value
                                 const precio = event.target.precio.value
                                 const direccion = event.target.direccion.value                                       
-                               
+                                
+
                                 this.props.addDocumentoNotaria(id, precio, direccion)
                                                             
                             } }>

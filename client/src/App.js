@@ -12,8 +12,7 @@ class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      account: '',
-      
+      account: '',      
       documentos: [],
       documentosPorCliente: [],
       documentosEmisor: [],
@@ -27,11 +26,12 @@ class App extends Component {
 
     //Se debe bindear para que react sepa que al enviar la funcion
     // al otro js esta siendo la funcion ya creada
-    this.nuevaRegion = this.nuevaRegion.bind(this)
+
     this.nuevoDocumento = this.nuevoDocumento.bind(this)
     this.compraDocumento = this.compraDocumento.bind(this)
     this.addDocumentoNotaria = this.addDocumentoNotaria.bind(this)
     this.aceptaDocumento = this.aceptaDocumento.bind(this)
+    this.finalizaDocumento = this.finalizaDocumento.bind(this)
     
   }
 
@@ -104,21 +104,14 @@ class App extends Component {
 
       this.setState({ regionesCount, documentosCount, owner: owner })      
       
-      const contDocumentosCliente = await notaria.methods.totalDocumentosCliente(this.state.account).call()      
+    
       const totalDocumentosEmisor = await notaria.methods.totalDocumentosEmisor(this.state.account).call()      
       const totalDocumentosDestinatario = await notaria.methods.totalDocumentosDestinatario(this.state.account).call()      
 
       console.log("total emisor" + " " + totalDocumentosEmisor)
       console.log("total destinatario" + " " + totalDocumentosDestinatario)
 
-      //Documentos por cliente
-      for(var i = 1; i <= contDocumentosCliente; i++){
-        const docCliente = await notaria.methods.documentosCliente(this.state.account, i).call()        
-                console.log(docCliente)
-        this.setState({
-          documentosPorCliente: [...this.state.documentosPorCliente, docCliente ]
-       })
-      }
+
 
       //Documentos Emisor
       for(var a = 1; a <= totalDocumentosEmisor; a++){
@@ -128,6 +121,7 @@ class App extends Component {
        })
       }
 
+      console.log(this.state.account)
       //Documentos Destinatario
       for(var b = 1; b <= totalDocumentosDestinatario; b++){
         const doc = await notaria.methods.documentosNotariaDestinatario(this.state.account, b).call()        
@@ -149,7 +143,7 @@ class App extends Component {
 
       this.setState({ loading: false })
 
-      console.log(this.state.documentosEmisor)
+      
       console.log(this.state.documentosDestinatario)
       
     } else {
@@ -157,15 +151,6 @@ class App extends Component {
     }
   }
 
-  nuevaRegion(direccion, nombre) {
-
-    this.setState({ loading: true })
-    this.state.presupuesto.methods.nuevaRegion(direccion, nombre).send({ from: this.state.account })
-    //recibo de la transaccion desde la blockchain
-      .once('receipt', (receipt) => {
-        this.setState({ loading: false })
-      });
-  }
 
   nuevoDocumento(precio, nombre, estado) {
 
@@ -188,12 +173,17 @@ class App extends Component {
   }
 
   async aceptaDocumento(id){
-    await this.state.notaria.methods.AceptaDocumentoNotaria(id).send({ from: this.state.account, price: 2000000000000000000 })
+    await this.state.notaria.methods.AceptaDocumentoNotaria(id).send({ from: this.state.account, value: 2000000000000000000 })
+    .on('error', (error) => {
+      console.log('error')
+      console.log(error)
+    })
     .once('receipt', (receipt) => {
       console.log('once')
       this.setState({ loading: false })
       console.log(receipt)
     })
+
     .then((receipt) => {
       console.log('then')
       console.log(receipt)
@@ -201,10 +191,30 @@ class App extends Component {
     });
   }
 
+  async finalizaDocumento(id){
+    await this.state.notaria.methods.FinalizaDocumentoNotaria(id).send({ from: this.state.account, value: 2000000000000000000 })
+    .on('error', (error) => {
+      console.log('error')
+      console.log(error)
+    })
+    .once('receipt', (receipt) => {
+      console.log('once')
+      this.setState({ loading: false })
+      console.log(receipt)
+    })
+
+    .then((receipt) => {
+      console.log('then')
+      console.log(receipt)
+
+    });
+  }
+
+
   
   async addDocumentoNotaria(id, precio, destinatario){
     this.setState({ loading: true })
-    console.log(id, precio, destinatario)
+    console.log("id " + id, "precio " + precio,"destinatario " +  destinatario)
 
     await this.state.notaria.methods.AddDocumentoNotaria(id, precio, destinatario).send({ from: this.state.account })
     .once('receipt', (receipt) => {
@@ -252,7 +262,9 @@ class App extends Component {
                     nuevoDocumento={ this.nuevoDocumento } 
                     compraDocumento={ this.compraDocumento }
                     aceptaDocumento= {this.aceptaDocumento}
-                    addDocumentoNotaria={ this.addDocumentoNotaria }/> }
+                    finalizaDocumento= {this.finalizaDocumento}
+                    addDocumentoNotaria={ this.addDocumentoNotaria }
+                    /> }
 
             </main>
           </div>

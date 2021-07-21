@@ -21,24 +21,52 @@ class DocumentosDestinatario extends Component {
         return estado
     }
 
+    retornaHola(idEstado){
+        console.log("estado " + idEstado)
+
+        if(idEstado === '0'){
+            return "<button type='submit' className='btn btn-success'>Aceptar Documento</button>"
+        }
+        else if(idEstado === '1'){
+            return "<button type='submit' className='btn btn-warni'>Aceptar Finalizar</button>"
+        }
+        else if(idEstado === '2'){
+            return "<button type='submit' className='btn btn-danger'>Documento Finalizado</button>"
+        }
+        else{
+            return "No funciona"
+        }        
+    }
+
+    execDocumento(idDocumento, idEstado){
+
+
+        if(idEstado == 0){
+            this.props.aceptaDocumento(idDocumento)
+        }
+        else if(idEstado == 1){
+            this.props.finalizaDocumento(idDocumento)
+        }
+    }
+
     render() {
         return (
-            <div className="col-lg-6 mt-2">
-                <h1>Historial Documentos Destinatario</h1>
+            <div className="col-lg-12 d-flex justify-content-left my-5">
+                
 
                 {this.props.documentosDestinatario.map((documento, key) => {
                     return (
-                       
-                            <form key={key} id={"notaria-"+ documento.id} onSubmit={(event) => {
-                                event.preventDefault() 
-                                const idDocumento = event.target.id.value 
+                        <div className="col-lg-2" key={key}>
+                            <form id={"notaria-" + documento.id} onSubmit={(event) => {
+                                event.preventDefault()
+                                const idDocumento = event.target.id.value
+                                const idEstado = documento.estado
+                                this.execDocumento(idDocumento, idEstado)
                                 
-                                console.log(idDocumento)
-                                this.props.aceptaDocumento(idDocumento)
                             }}>
                                 <div className="mb-3">
                                     <label className="form-label">Documento</label>
-                                    <input name="id" readOnly type="text" className="form-control" defaultValue={documento.id}  />                                    
+                                    <input name="id" readOnly type="text" className="form-control" defaultValue={documento.id} />
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label">Precio</label>
@@ -60,15 +88,15 @@ class DocumentosDestinatario extends Component {
                                     <label className="form-label">Precio</label>
                                     <input readOnly type="text" className="form-control" defaultValue={documento.documento.precio} />
                                 </div>
-                                                                                                                                                                                                    
-                                    <button type="submit" className="btn btn-success">Aceptar Documento</button>
-                                </form>
-                            
-                            )
-                })}
-                        </div>
+
+                                <button type="submit" className="btn btn-success">Aceptar Documento</button>
+                            </form>
+                            </div>
                     )
-                }
+                })}
+            </div>
+        )
+    }
 }
 
-                export default DocumentosDestinatario
+export default DocumentosDestinatario

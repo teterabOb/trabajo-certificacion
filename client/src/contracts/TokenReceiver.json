@@ -2797,12 +2797,12 @@
     "5777": {
       "events": {},
       "links": {},
-      "address": "0xE9Ce335D37E59c07668852B7Fe341B3C66b89750",
-      "transactionHash": "0x744d0a94ffbe07667ba91792bcda4eefbb268a35ed7907ff2a2099e7fbb5910c"
+      "address": "0x63fBdD194B40454C1ccf5474128c41Ec65Ba05B3",
+      "transactionHash": "0x4e1a3a0bcbbd6450c84e089b022ab3f4cfef4d43ab5f2afb9809102c953be597"
     }
   },
   "schemaVersion": "3.3.4",
-  "updatedAt": "2021-07-17T20:01:08.385Z",
+  "updatedAt": "2021-07-18T19:54:13.754Z",
   "networkType": "ethereum",
   "devdoc": {
     "details": "Very simple example of a contract receiving ERC20 tokens.",

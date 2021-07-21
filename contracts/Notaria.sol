@@ -26,8 +26,7 @@ contract Notaria is CLPToken() {
     }
 
     mapping(uint => Documento) public documentos;
-    mapping(address => mapping(uint => Documento)) public documentosCliente;
-    mapping(address => uint) public totalDocumentosCliente;
+
 
     mapping(address => uint) public totalDocumentosEmisor;
     mapping(address => uint) public totalDocumentosDestinatario;
@@ -60,6 +59,7 @@ contract Notaria is CLPToken() {
         documentosNotariaCount++;
         DocumentoNotaria memory docNotaria = DocumentoNotaria(documentosNotariaCount, doc, msg.sender, _destinatario, _precio, EstadoDocumentoNotaria.ABIERTO);
         documentosNotaria[documentosNotariaCount] = docNotaria;
+
         totalDocumentosEmisor[msg.sender]++;
         totalDocumentosDestinatario[_destinatario]++;
         documentosNotariaEmisor[msg.sender][documentosNotariaCount] = docNotaria;
@@ -68,8 +68,9 @@ contract Notaria is CLPToken() {
     }
     
     function AceptaDocumentoNotaria(uint _idDocumento) public payable returns (bool){
-        require(msg.value > 1 ether, "Monto insuficiente");
+        
         DocumentoNotaria memory _docNotaria = GetDocumentoNotaria(_idDocumento);
+        require(msg.value > _docNotaria.precio , "Monto insuficiente");
         require(_docNotaria.estado == EstadoDocumentoNotaria.ABIERTO);
         require(_docNotaria.destinatario == msg.sender, "Solo el destinatario puede aceptar el Documento");
         
@@ -84,8 +85,9 @@ contract Notaria is CLPToken() {
     }
     
     function FinalizaDocumentoNotaria(uint _idDocumento) public payable returns (bool){
-        require(msg.value > 1 ether, "Monto insuficiente");
+        
         DocumentoNotaria memory _docNotaria = GetDocumentoNotaria(_idDocumento);
+        require(msg.value > _docNotaria.precio , "Monto insuficiente");
         require(_docNotaria.estado == EstadoDocumentoNotaria.ACEPTADO);
         require(_docNotaria.destinatario == msg.sender, "Solo el destinatario puede Acceder al pago de este Documento");
         
@@ -128,30 +130,12 @@ contract Notaria is CLPToken() {
         return doc;
     }
     
-    function GetDocumentoNotariaReceptor(uint _idDocumento, address _direccion) public view returns(DocumentoNotaria memory doc){
+    function GetDocumentoNotariaDestinatario(uint _idDocumento, address _direccion) public view returns(DocumentoNotaria memory doc){
         doc = documentosNotariaDestinatario[_direccion][_idDocumento];
         return doc;
     }
 
-    function AddDocumentoCliente(uint _id, uint _precio, string memory _nombre, bool _estado) public {
-        documentosCliente[msg.sender][_id] = Documento(_id, _precio, _nombre, _estado);
-    }
-
-    function compraDocumento(uint _id) external payable {
-        Documento memory _documento = documentos[_id];
-        // Valida que el Documento tenga un ID mayor que 0
-        require(_documento.id > 0);
-        // Requiere que haya suficiente ETH en la transaccion
-        require(msg.value >= _documento.precio);
-        //Transfiere el precio del Documento
-        payable((msg.sender)).transfer(msg.value);
-        //Suma 1 al mapping de Documentos x Cliente
-        totalDocumentosCliente[msg.sender]++;
-        //Agrega el documento comprado al mapping de Documentos Comprados x Cliente
-        AddDocumentoCliente(_documento.id, _documento.precio, _documento.nombre, _documento.estado);
-        // Dispara el evento
-        emit DocumentoComprado(_id, msg.sender);
-    }  
+ 
     
     function GetOwner() public view returns (address){
         return owner;
