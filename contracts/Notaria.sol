@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "./CLPToken.sol";
 
 contract Notaria is CLPToken() {
-    address private owner;
+    address public owner;
     uint public documentsCount = 0;
     uint public documentosNotariaCount = 0;
     enum EstadoDocumentoNotaria{ ABIERTO, ACEPTADO, FINALIZADO }
@@ -105,15 +105,8 @@ contract Notaria is CLPToken() {
         DocumentoNotaria memory _docNotaria = GetDocumentoNotaria(_idDocumento);
         require(_docNotaria.estado == EstadoDocumentoNotaria.ACEPTADO || _docNotaria.estado == EstadoDocumentoNotaria.ABIERTO);
         return true;
-    }
-    
-    /*
-    function CancelaDocumentoNotaria(uint _idDocumento) public payable returns (bool){
-        require(msg.value > 1 ether, "Monto insuficiente");
-        Documento memory doc = GetDocumento(_idDocumento);
-        return true;
-    }
-    */
+    }   
+
     
     function GetDocumento(uint _idDocumento) public view returns(Documento memory doc){
         doc = documentos[_idDocumento];
@@ -133,9 +126,7 @@ contract Notaria is CLPToken() {
     function GetDocumentoNotariaDestinatario(uint _idDocumento, address _direccion) public view returns(DocumentoNotaria memory doc){
         doc = documentosNotariaDestinatario[_direccion][_idDocumento];
         return doc;
-    }
-
- 
+    } 
     
     function GetOwner() public view returns (address){
         return owner;

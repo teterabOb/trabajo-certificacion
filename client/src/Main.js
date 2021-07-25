@@ -16,7 +16,7 @@ class Main extends Component {
 
     handleChange(event) {
         this.setState({ estado: event.target.value })
-        console.log(this.state.estado)
+        
     }
 
     render() {
@@ -27,8 +27,6 @@ class Main extends Component {
         if (account === owner) {
             return (
                 <div className="col-lg-12" id="content">
-                    <p>owner</p>
-
                     <div className="col-lg-6 mt-2">
                         <h1>Nuevo Documento</h1>
                         <form onSubmit={(event) => {
@@ -73,83 +71,39 @@ class Main extends Component {
                 </div>
             )
         }
-        else {
-            return (
 
-                <div className="row mx-2" id="content">
-                    <div className="col-lg-12">
-                        <p>Cuenta actual: {account}</p>
-                        <p>Owner: {owner}</p>
-                    </div>
+        return (
 
-                    <div className="col-lg-12 mt-2">
-                        <h1>Documentos Disponibles</h1>
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">Nombre</th>
-                                    <th scope="col">Precio</th>
-                                    <th scope="col">Estado</th>
-                                    <th scope="col"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="regionesList">
-                                {this.props.documentos.map((documento, key) => {
-                                    if (documento.id > 0) {
-                                        return (
+            <div className="row mx-2" id="content">
+                <div className="col-lg-12">
+                </div>
 
-                                            <tr key={key}>
-                                                <td scope="row">{documento.id}</td>
-                                                <td>{documento.nombre}</td>
-                                                <td>{documento.precio} Ether</td>
-                                                <td>{documento.estado === true ? 'Activo' : 'Inactivo'}</td>
-                                                <td>
-                                                    <button
-                                                        name={documento.id}
-                                                        value={documento.precio}
-                                                        onClick={(event) => {
-                                                            this.props.compraDocumento(event.target.name, event.target.value)
-                                                        }}
-
-                                                        className="btn btn-success btn-sm">
-                                                        Generar
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        )
-                                    }
-
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div className="col-lg-12">
-                        <MantenedorNotaria
-                            documentos={this.props.documentos}
-                            addDocumentoNotaria={this.props.addDocumentoNotaria}
-                        />
-                    </div>
-                    <div className="col-lg-12">
-                        <DocumentosEmisor
-                            documentosEmisor={this.props.documentosEmisor}
-                        />
-                    </div>
-
-
-                    <div className="col-lg-12">
-                        <DocumentosDestinatario
-                            documentosDestinatario={this.props.documentosDestinatario}
-                            aceptaDocumento={this.props.aceptaDocumento}
-                            finalizaDocumento={this.props.finalizaDocumento}
-                            
-                        />
-                    </div>
+                <div className="col-lg-12">
+                    <MantenedorNotaria
+                        documentos={this.props.documentos}
+                        addDocumentoNotaria={this.props.addDocumentoNotaria}
+                    />
+                </div>
+                <div className="col-lg-12">
+                    <DocumentosEmisor
+                        documentosEmisor={this.props.documentosEmisor}
+                    />
                 </div>
 
 
-            )
-        }
+                <div className="col-lg-12">
+                    <DocumentosDestinatario
+                        documentosDestinatario={this.props.documentosDestinatario}
+                        aceptaDocumento={this.props.aceptaDocumento}
+                        finalizaDocumento={this.props.finalizaDocumento}
+
+                    />
+                </div>
+            </div>
+
+
+        )
+
     }
 }
 

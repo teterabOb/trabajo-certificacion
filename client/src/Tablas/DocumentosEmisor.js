@@ -23,22 +23,37 @@ class DocumentosEmisor extends Component {
 
     render() {
         const cantDocumentos = this.props.documentosEmisor.length
-        return (
-            <div className="col-lg-12 mt-2">
-                <h1>Historial Documentos Emitidos</h1>
 
-                {this.props.documentosEmisor.map((documento, key) => {
-                    return (
-                        <li key={key}>ID: {documento.id} - 
-                                        Precio: {documento.precio} -  
-                                        Destinatario: {documento.destinatario} - 
+        if (cantDocumentos > 0) {
+            return (
+                <div className="col-lg-12 mt-2 border border-primary rounded-lg">
+                    <div className="bg-primary row p-3 text-white text-center"><h4>Documentos Emitidos</h4></div>
+                    <div className="col-lg-12 content w-100">
+                        <ul className="list-group">
+                            {this.props.documentosEmisor.map((documento, key) => {
+                                return (
+                                    <li className="list-group-item" key={key}>ID: {documento.id} -
+                                        Precio: {documento.precio} -
+                                        Destinatario: {documento.destinatario} -
                                         Estado: {this.retornaEstado(documento.estado)} -
                                         Documento: {documento.documento}
-                        </li>
-                    )
-                })}
-            </div>
-        )
+                                    </li>
+                                )
+                            })}
+                        </ul>
+                    </div>
+                </div>
+            )
+        } else {
+            return (
+                <div className="col-lg-12 mt-2 border border-primary rounded-lg">
+                    <div className="bg-primary row p-2 text-white"><h4>Documentos Emitidos</h4></div>
+                    <div className="col-lg-12">
+                        <p className="text-center mt-2">No tiene Documentos emitidos registrados.</p>
+                    </div>
+                </div>
+            )
+        }
     }
 }
 

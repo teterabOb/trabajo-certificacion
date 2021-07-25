@@ -9,6 +9,7 @@ class MantenedorNotaria extends Component {
         return (
             <div className="col-lg-12 row">
                 {this.props.documentos.map((documento, key) => {
+                    
                     return (
                         
                             <form ref="form" id={"notaria-"+ documento.id} key={key} onSubmit={(event) => {
