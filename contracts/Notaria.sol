@@ -3,10 +3,11 @@ pragma solidity ^0.8.0;
 
 import "./CLPToken.sol";
 
-contract Notaria is CLPToken() {
+contract Notaria  {
     address public owner;
     uint public documentsCount = 0;
     uint public documentosNotariaCount = 0;
+    IERC20 private token;
     enum EstadoDocumentoNotaria{ ABIERTO, ACEPTADO, FINALIZADO }
 
     struct Documento{ 
@@ -27,7 +28,6 @@ contract Notaria is CLPToken() {
 
     mapping(uint => Documento) public documentos;
 
-
     mapping(address => uint) public totalDocumentosEmisor;
     mapping(address => uint) public totalDocumentosDestinatario;
     
@@ -38,9 +38,27 @@ contract Notaria is CLPToken() {
     event DocumentoAdded(uint id, uint precio, string nombre, bool estado, address owner);
     event DocumentoNotariaAdded(uint id, Documento documento, string nombre,  address owner, uint precio);
     event DocumentoComprado(uint id, address owner);
+    event premioTokenDado(address recipient);
     
-    constructor() {
+    constructor(IERC20 _token) {
+        token = _token;
         owner = msg.sender;
+    }
+
+    function PremioToken() private {
+        uint256 amountToWithDrawal = token.balanceOf(address(this));
+        require(amountToWithDrawal >= 10, "No hay suficientes token");
+        token.transfer(msg.sender, 10);   
+        emit premioTokenDado(msg.sender);
+    } 
+
+    function ValidaDisponibilidadPremio() public view returns (bool){
+        uint256 amountToWithDrawal = token.balanceOf(address(this));
+        if(amountToWithDrawal >= 10){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     function AddDocumento(uint _precio, string memory _nombre, bool _estado) public payable{
@@ -63,7 +81,10 @@ contract Notaria is CLPToken() {
         totalDocumentosEmisor[msg.sender]++;
         totalDocumentosDestinatario[_destinatario]++;
         documentosNotariaEmisor[msg.sender][documentosNotariaCount] = docNotaria;
-        documentosNotariaDestinatario[_destinatario][documentosNotariaCount] = docNotaria;        
+        documentosNotariaDestinatario[_destinatario][documentosNotariaCount] = docNotaria;   
+        if(ValidaDisponibilidadPremio() == true){
+            PremioToken();
+        }         
         return docNotaria.estado;
     }
     
@@ -97,7 +118,7 @@ contract Notaria is CLPToken() {
         require(documentosNotariaEmisor[_docNotaria.owner][_idDocumento].destinatario == _docNotaria.destinatario, "El destinatario no coincide con el de origen");
         
         documentosNotariaEmisor[_docNotaria.owner][_idDocumento].estado = EstadoDocumentoNotaria.FINALIZADO;
-        payable(_docNotaria.owner).transfer(msg.value);
+        payable(_docNotaria.owner).transfer(msg.value);        
         return true;
     }
     

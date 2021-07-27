@@ -1,4 +1,4 @@
-const CLPToken = artifacts.require("./CLPToken.sol");
+/*const CLPToken = artifacts.require("./CLPToken.sol");
 const Tokenreceiver = artifacts.require("./TokenReceiver");
 
 module.exports = async function(deployer) {
@@ -7,3 +7,4 @@ module.exports = async function(deployer) {
 
   await deployer.deploy(Tokenreceiver, token.address);
 };
+*/
