@@ -47,14 +47,14 @@ contract Notaria  {
 
     function EnviarPremioToken() private {
         uint256 amountToWithDrawal = token.balanceOf(address(this));
-        require(amountToWithDrawal >= 10, "No hay suficientes tokens");
-        token.transfer(msg.sender, 10);   
+        require(amountToWithDrawal >= 10000000000000000000, "No hay suficientes tokens");
+        token.transfer(msg.sender, 10000000000000000000);   
         emit premioTokenDado(msg.sender);
     } 
 
     function ValidaDisponibilidadPremio() public view returns (bool){
         uint256 amountToWithDrawal = token.balanceOf(address(this));
-        if(amountToWithDrawal >= 10){
+        if(amountToWithDrawal >= 10000000000000000000){
             return true;
         }else{
             return false;
@@ -97,7 +97,7 @@ contract Notaria  {
         documentosNotariaDestinatario[msg.sender][_idDocumento].estado = EstadoDocumentoNotaria.ACEPTADO;        
         require(documentosNotariaEmisor[_docNotaria.owner][_idDocumento].destinatario == _docNotaria.destinatario, "El destinatario no coincide con el de origen");
         documentosNotariaEmisor[_docNotaria.owner][_idDocumento].estado = EstadoDocumentoNotaria.ACEPTADO;
-        
+
         if(ValidaDisponibilidadPremio() == true){
             EnviarPremioToken();
         }        

@@ -4,8 +4,7 @@ class DocumentosDestinatario extends Component {
     constructor(props) {
         super(props)
     }
-
-
+    
     retornaEstado(idEstado) {
         let estado
         switch (idEstado) {
@@ -122,8 +121,6 @@ class DocumentosDestinatario extends Component {
                 </div>
             )
         }
-
-
     }
 }
 
