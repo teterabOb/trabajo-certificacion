@@ -45,9 +45,9 @@ contract Notaria  {
         owner = msg.sender;
     }
 
-    function PremioToken() private {
+    function EnviarPremioToken() private {
         uint256 amountToWithDrawal = token.balanceOf(address(this));
-        require(amountToWithDrawal >= 10, "No hay suficientes token");
+        require(amountToWithDrawal >= 10, "No hay suficientes tokens");
         token.transfer(msg.sender, 10);   
         emit premioTokenDado(msg.sender);
     } 
@@ -71,6 +71,7 @@ contract Notaria  {
     }
     
     function AddDocumentoNotaria(uint _idDocumento, uint _precio, address _destinatario) public payable returns(EstadoDocumentoNotaria){
+        require(msg.sender != address(0), "El destinatario debe ser valido");
         require(msg.sender != _destinatario, "El emisor del documento debe ser distinto al destinatario");
         Documento memory doc = documentos[_idDocumento];
         require(doc.id > 0, "El documento no existe en nuestros registros");
@@ -82,26 +83,24 @@ contract Notaria  {
         totalDocumentosDestinatario[_destinatario]++;
         documentosNotariaEmisor[msg.sender][documentosNotariaCount] = docNotaria;
         documentosNotariaDestinatario[_destinatario][documentosNotariaCount] = docNotaria;   
-        if(ValidaDisponibilidadPremio() == true){
-            PremioToken();
-        }         
+ 
         return docNotaria.estado;
     }
     
-    function AceptaDocumentoNotaria(uint _idDocumento) public payable returns (bool){
+    function AceptaDocumentoNotaria(uint _idDocumento) public returns (bool){
         
         DocumentoNotaria memory _docNotaria = GetDocumentoNotaria(_idDocumento);
-        require(msg.value > _docNotaria.precio , "Monto insuficiente");
+        //require(msg.value > _docNotaria.precio , "Monto insuficiente");
         require(_docNotaria.estado == EstadoDocumentoNotaria.ABIERTO);
-        require(_docNotaria.destinatario == msg.sender, "Solo el destinatario puede aceptar el Documento");
-        
-        documentosNotaria[_idDocumento].estado = EstadoDocumentoNotaria.ACEPTADO;
-        
-        documentosNotariaDestinatario[msg.sender][_idDocumento].estado = EstadoDocumentoNotaria.ACEPTADO;
-        
+        require(_docNotaria.destinatario == msg.sender, "Solo el destinatario puede aceptar el Documento");        
+        documentosNotaria[_idDocumento].estado = EstadoDocumentoNotaria.ACEPTADO;        
+        documentosNotariaDestinatario[msg.sender][_idDocumento].estado = EstadoDocumentoNotaria.ACEPTADO;        
         require(documentosNotariaEmisor[_docNotaria.owner][_idDocumento].destinatario == _docNotaria.destinatario, "El destinatario no coincide con el de origen");
         documentosNotariaEmisor[_docNotaria.owner][_idDocumento].estado = EstadoDocumentoNotaria.ACEPTADO;
         
+        if(ValidaDisponibilidadPremio() == true){
+            EnviarPremioToken();
+        }        
         return true;
     }
     

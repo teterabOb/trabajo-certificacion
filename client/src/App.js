@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PresupuestoContract from "./contracts/Presupuesto.json";
-import TokenReceiver from "./contracts/TokenReceiver.json";
+import CLPTokenContract from "./contracts/CLPToken.json";
 import NotariaContract from "./contracts/Notaria.json";
 import Web3 from 'web3';
 import Navbar from './Navbar';
@@ -13,26 +13,24 @@ class App extends Component {
     super(props)
     this.state = {
       account: '',      
-      documentos: [],
-      documentosPorCliente: [],
+      documentos: [],      
       documentosEmisor: [],
       documentosDestinatario: [],
       montoAutorizado: 0,
       loading: true,
       owner: "0x0000000000000000000000000000000000000000",
-      cantToken: 0
+      cantTokenUsuario: 0,
+      cantTokenContrato: 0,
 
     }
 
     //Se debe bindear para que react sepa que al enviar la funcion
     // al otro js esta siendo la funcion ya creada
 
-    this.nuevoDocumento = this.nuevoDocumento.bind(this)
-    this.compraDocumento = this.compraDocumento.bind(this)
+    this.nuevoDocumento = this.nuevoDocumento.bind(this)    
     this.addDocumentoNotaria = this.addDocumentoNotaria.bind(this)
     this.aceptaDocumento = this.aceptaDocumento.bind(this)
-    this.finalizaDocumento = this.finalizaDocumento.bind(this)
-    
+    this.finalizaDocumento = this.finalizaDocumento.bind(this)    
   }
 
   async componentDidMount() {
@@ -86,6 +84,7 @@ class App extends Component {
 
     const networkDataPresupuesto = PresupuestoContract.networks[networkId]
     const networkDataNotaria = NotariaContract.networks[networkId]
+    const networkDataCLPToken = CLPTokenContract.networks[networkId]
 
 
     if (networkDataNotaria) {
@@ -95,24 +94,18 @@ class App extends Component {
 
       const presupuesto = new web3.eth.Contract(PresupuestoContract.abi, networkDataPresupuesto.address);
       const notaria = new web3.eth.Contract(NotariaContract.abi, networkDataNotaria.address);
-      const tokenReceiver = new web3.eth.Contract(TokenReceiver.abi, networkDataNotaria.address);
+      const CLPToken = new web3.eth.Contract(CLPTokenContract.abi, networkDataCLPToken.address);
 
       this.setState({ presupuesto, notaria })
       //Las funciones call leen data
       const regionesCount = await presupuesto.methods.RegionCount().call()
       const documentosCount = await notaria.methods.documentsCount().call()
       const owner = await notaria.methods.GetOwner().call()
-
   
-
-      this.setState({ regionesCount, documentosCount, owner: owner })      
-      
+      this.setState({ regionesCount, documentosCount, owner: owner })          
     
       const totalDocumentosEmisor = await notaria.methods.totalDocumentosEmisor(this.state.account).call()      
       const totalDocumentosDestinatario = await notaria.methods.totalDocumentosDestinatario(this.state.account).call()      
-
-
-
 
       //Documentos Emisor
       for(var a = 1; a <= totalDocumentosEmisor; a++){
@@ -136,14 +129,23 @@ class App extends Component {
            this.setState({             
               documentos: [...this.state.documentos, documento]
            })           
+      };     
+      
+      const tokensUser = await CLPToken.methods.balanceOf(this.state.account).call() 
+      const tokensContrato = await CLPToken.methods.balanceOf(notaria._address).call() 
+      
+      if(tokensUser != 'undefined') {
+        let tokenString = (tokensUser).toString()
+        { this.setState({ cantTokenUsuario:  web3.utils.fromWei(tokenString, 'ether')}) }  
       }
-
-      const cantToken = await notaria.methods.balanceOf(this.state.account).call() 
-      if(cantToken > 0) { this.setState({ cantToken: cantToken}) }  
+      if(tokensContrato != 'undefined') {
+        let tokenString = (tokensContrato).toString()        
+        { this.setState({ cantTokenContrato: web3.utils.fromWei(tokenString, 'ether')}) }  
+      }     
+      
+      console.log(this.state.documentosDestinatario)
 
       this.setState({ loading: false })
-
-
       
     } else {
         this.setState({ loading: false })
@@ -161,63 +163,34 @@ class App extends Component {
       });
   }
 
-  async compraDocumento(id, precio) {
-
-    this.setState({ loading: true })
-    await this.state.notaria.methods.compraDocumento(id).send({ from: this.state.account, value: precio })
-    //recibo de la transaccion desde la blockchain
-      .once('receipt', (receipt) => {
-        this.setState({ loading: false })
-      });
-  }
-
   async aceptaDocumento(id){
+    let web3 = window.web3
+
     await this.state.notaria.methods.AceptaDocumentoNotaria(id).send({ from: this.state.account, value: 2000000000000000000 })
     .on('error', (error) => {
       console.log('error')
       console.log(error)
     })
-    .once('receipt', (receipt) => {
-      console.log('once')
-      this.setState({ loading: false })
-      console.log(receipt)
+    .once('receipt', (receipt) => {                
+      this.loadBlockChainData()
     })
 
-    .then((receipt) => {
-      console.log('then')
-      console.log(receipt)
-
-    });
   }
 
   async finalizaDocumento(id){
     await this.state.notaria.methods.FinalizaDocumentoNotaria(id).send({ from: this.state.account, value: 2000000000000000000 })
-    .on('error', (error) => {
-      console.log('error')
+    .on('error', (error) => {      
       console.log(error)
     })
-    .once('receipt', (receipt) => {
-      console.log('once')
-      this.setState({ loading: false })
-      console.log(receipt)
+    .once('receipt', (receipt) => {      
+      this.loadBlockChainData()
     })
-
-    .then((receipt) => {
-      console.log('then')
-      console.log(receipt)
-
-    });
   }
 
-  async addDocumentoNotaria(id, precio, destinatario){
-    this.setState({ loading: true })
-    console.log("id " + id, "precio " + precio,"destinatario " +  destinatario)
-
+  async addDocumentoNotaria(id, precio, destinatario){      
     await this.state.notaria.methods.AddDocumentoNotaria(id, precio, destinatario).send({ from: this.state.account })
-    .once('receipt', (receipt) => {
-      console.log('receipt')
-      this.setState({ loading: false })
-      console.log(receipt)
+    .once('receipt', (receipt) => {            
+      this.loadBlockChainData()
     })
     .on('confirmation', (confNumber, receipt, latestBlockHash) => {
       console.log('confirmacion')
@@ -229,11 +202,6 @@ class App extends Component {
       console.log('error')
       console.log(error)
     })
-    .then((receipt) => {
-      console.log(receipt)
-
-    });
-
   }
 
   render() {
@@ -242,9 +210,10 @@ class App extends Component {
       <div className="bg-light">
         <Navbar account={this.state.account} />
         <div className="container-fluid mt-5">
-          <div classname="row">
+          <div className="row">
             <div className="col-lg-12">
-              <p>Precio: ETH</p>
+              <p>CLPT Disponibles: { this.state.cantTokenContrato }</p>
+              <p>Tus CLPT: { this.state.cantTokenUsuario }</p>
             </div>
           </div>
           <div className="row">

@@ -32,11 +32,11 @@ class DocumentosEmisor extends Component {
                         <ul className="list-group">
                             {this.props.documentosEmisor.map((documento, key) => {
                                 return (
-                                    <li className="list-group-item" key={key}>ID: {documento.id} -
-                                        Precio: {documento.precio} -
-                                        Destinatario: {documento.destinatario} -
-                                        Estado: {this.retornaEstado(documento.estado)} -
-                                        Documento: {documento.documento}
+                                    <li className="list-group-item" key={key}><strong>ID:</strong> {documento.id} -
+                                        <strong> Precio:</strong> <label>{documento.precio}</label> <strong>ETH</strong> - 
+                                        <strong> Destinatario:</strong> <label className="text-danger">{documento.destinatario}</label>  -
+                                        <strong> Estado:</strong> {this.retornaEstado(documento.estado)} -
+                                        <strong> Documento:</strong> {documento.documento.nombre}
                                     </li>
                                 )
                             })}
