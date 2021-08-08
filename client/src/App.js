@@ -75,7 +75,6 @@ class App extends Component {
 
   async loadBlockChainData() {
     const web3 = window.web3
-
     
     //Carga cuenta
     const accounts = await web3.eth.getAccounts()
@@ -166,7 +165,7 @@ class App extends Component {
   async aceptaDocumento(id){
     let web3 = window.web3
 
-    await this.state.notaria.methods.AceptaDocumentoNotaria(id).send({ from: this.state.account, value: 2000000000000000000 })
+    await this.state.notaria.methods.AceptaDocumentoNotaria(id).send({ from: this.state.account })
     .on('error', (error) => {
       console.log('error')
       console.log(error)
@@ -178,13 +177,23 @@ class App extends Component {
   }
 
   async finalizaDocumento(id){
-    await this.state.notaria.methods.FinalizaDocumentoNotaria(id).send({ from: this.state.account, value: 2000000000000000000 })
+
+
+    let docDestinatario = await this.state.notaria.methods.documentosNotariaDestinatario(this.state.account, id).call()   
+    let precio = (docDestinatario.precio).toString()
+    let web3 = window.web3
+    let precioETH = web3.utils.toWei(precio, 'ether');
+
+    
+    await this.state.notaria.methods.FinalizaDocumentoNotaria(id).send({ from: this.state.account, value: precioETH })
     .on('error', (error) => {      
       console.log(error)
     })
     .once('receipt', (receipt) => {      
       this.loadBlockChainData()
     })
+    
+    
   }
 
   async addDocumentoNotaria(id, precio, destinatario){      
@@ -207,13 +216,18 @@ class App extends Component {
   render() {
 
     return (
-      <div className="bg-light">
+      <div className="bg-light pt-5">
         <Navbar account={this.state.account} />
         <div className="container-fluid mt-5">
-          <div className="row">
-            <div className="col-lg-12">
-              <p>CLPT Disponibles: { this.state.cantTokenContrato }</p>
-              <p>Tus CLPT: { this.state.cantTokenUsuario }</p>
+          <div className="row mb-3">
+            <div className="col-lg-12 bg-dark">
+              <div className="col-lg-6">
+              <p className="text-white"><label>CLPT Disponibles: { this.state.cantTokenContrato }</label></p>
+              </div>
+              <div className="col-lg-6">
+              <p className="text-white"><label>CLPT: { this.state.cantTokenUsuario }</label></p>
+              </div>             
+              
             </div>
           </div>
           <div className="row">
